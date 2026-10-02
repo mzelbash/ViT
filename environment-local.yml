@@ -1,0 +1,22 @@
+# LOCAL conda use only. Deliberately NOT named environment.yml, because
+# Streamlit Community Cloud builds with conda whenever that filename exists,
+# and the conda pytorch build pulls an MKL out of step with libtorch_cpu.so:
+#   ImportError: ... libtorch_cpu.so: undefined symbol: iJIT_NotifyEvent
+# The mkl pin below is what avoids that if you do use conda locally.
+# For deployment, Streamlit Cloud should use requirements.txt with pip.
+name: vit-walkthrough
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.11
+  - mkl=2024.0.0          # must stay 2024.0.*; later MKL triggers the ITT symbol error
+  - pytorch>=2.2
+  - cpuonly
+  - pip
+  - pip:
+    - streamlit>=1.33
+    - transformers>=4.40
+    - matplotlib>=3.7
+    - numpy>=1.24
+    - pillow>=9.5

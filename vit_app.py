@@ -640,6 +640,24 @@ def load_vit():
     model.eval()
     return model
 
+def try_load_vit():
+    """load_vit(), but returns None and explains itself instead of showing a
+    traceback. The checkpoint is about 330 MB, which a small hosted container
+    can fail to download or hold in memory."""
+    try:
+        return load_vit()
+    except Exception as exc:
+        st.error(
+            "Could not load the pretrained ViT-Base checkpoint "
+            "(about 330 MB).\n\n"
+            f"`{type(exc).__name__}: {exc}`\n\n"
+            "Everything else in this app runs without it. This section needs the "
+            "real trained weights, so it is the one place that depends on the "
+            "download succeeding. On a small hosted container this is usually "
+            "memory or disk, not your code: running locally will work."
+        )
+        return None
+
 
 # Parameter count of the ViT-Base built in Section 8 of this app. Published
 # figures for ViT-Base/16 sit a little under this (around 86.4M); the gap is
@@ -1312,8 +1330,10 @@ elif num == 4:
 
         sub("What the position embeddings actually learned")
         with st.spinner("Loading pretrained ViT-Base/16..."):
-            vit = load_vit()
-            pos = vit.embeddings.position_embeddings[0].detach()      # (197, 768)
+            vit = try_load_vit()
+        if vit is None:
+            st.stop()
+        pos = vit.embeddings.position_embeddings[0].detach()          # (197, 768)
         pn = pos / (pos.norm(dim=-1, keepdim=True) + 1e-8)
         sim = (pn @ pn.T).numpy()
 
@@ -1489,7 +1509,9 @@ elif num == 5:
 
     if run:
         with st.spinner("Running the pretrained model..."):
-            vit = load_vit()
+            vit = try_load_vit()
+            if vit is None:
+                st.stop()
             with torch.no_grad():
                 out = vit(pixel_values=preprocess_image(img224))
             attns = out.attentions                      # 12 x (1, 12, 197, 197)

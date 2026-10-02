@@ -1,6 +1,19 @@
+# Streamlit Community Cloud installs this with pip.
+#
+# --extra-index-url is required: the default PyPI torch wheel for Linux is the
+# CUDA build (several GB) and will not fit the Community Cloud resource limit.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# The mkl pin is the fix for:
+#   ImportError: .../torch/lib/libtorch_cpu.so: undefined symbol: iJIT_NotifyEvent
+# iJIT_NotifyEvent is an Intel ITT profiling symbol. MKL 2024.1 and later stopped
+# exporting it, while libtorch_cpu.so still expects it. Pinning MKL back to
+# 2024.0.0 restores the symbol. Keep this pin ABOVE torch.
+mkl==2024.0.0
+
 streamlit>=1.33
-torch
-transformers
-matplotlib
-numpy
-pillow
+torch==2.12.1+cpu
+transformers>=4.40
+matplotlib>=3.7
+numpy>=1.24
+pillow>=9.5
