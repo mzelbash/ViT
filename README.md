@@ -2,4 +2,4 @@
 
 Live at
 
-https://xn4ebxg2gte6vrmdrxazoc.streamlit.app/
+ https://seas8525-vit.streamlit.app/
